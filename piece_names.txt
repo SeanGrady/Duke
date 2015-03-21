@@ -1,0 +1,17 @@
+Footman
+Seer
+Priest
+Marshall
+Knight
+Pikeman
+Champion
+General
+Bowman
+Ranger
+Wizard
+Duke
+Dragoon
+Duchess
+Longbowman
+Oracle
+Assassin
