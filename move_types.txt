@@ -4,5 +4,8 @@ slide
 strike
 jump_slide
 command_square
-oracle_flip
+Divination
+Summon
+Escape
+Ransom
 
