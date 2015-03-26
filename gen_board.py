@@ -14,15 +14,16 @@ class MyBoard:
             1: self.evalJump,
             2: self.evalSlide,
             3: self.evalStrike,
-            4: self.evalJumpSlide
-            #5: self.evalCommandSquare,
-            #6: self.evalDivination,
-            #7: self.evalSummon
+            4: self.evalJumpSlide,
+            5: self.evalCommandSquare,
+            6: self.evalDivination,
+            7: self.evalSummon
             #8: self.escape
             #9: self.ransom
         }
         self.white_discard = deque()
         self.black_discard = deque()
+        self.duke_pos = [[], []]
 
     def __repr__(self):
         square_width = 16
@@ -48,7 +49,36 @@ class MyBoard:
             boardview += blank_row*3
         boardview += line_row
         return boardview
-
+    
+    #find and update the positions of both dukes. Probably don't use this unless
+    #it's really necessary. Ideally self.duke_pos will always be accurate. 
+    def updateDuke(self):
+        for i in range(self.height):
+            for j in range(self.width):
+                space = board.squares[i][j]
+                if space:
+                    if space.name == Duke:
+                        self.duke_pos[space.color] = [i, j]
+    
+    #return 1 if there are open spaces next to the duke, 0 if not
+    def dukeOpen(self, color):
+        adjct = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+        positions = [map(add, adj, self.duke_pos[color]) for adj in adjct]
+        for position in positions:
+            if self.isPosValid(position) and not self.squares[position[0]][position[1]]:
+                return 1
+        return 0
+    
+    #return clear spaces next to the specified color duke, if any
+    def dukeSpaces(self, color):
+        open_spaces = []
+        adjct = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+        positions = [map(add, adj, self.duke_pos[color]) for adj in adjct]
+        for position in positions:
+            if self.isPosValid(position) and not self.squares[position[0]][position[1]]:
+                open_spaces.append(position)
+        return open_spaces
+    
     #given a position, check if it is on the board
     def isPosValid(self, position):
         if position[0] not in range(self.height):
@@ -155,11 +185,17 @@ class MyBoard:
         return valid_moves
     
     def evalDivination(self, start, move, color):
-        if color == 'White':
-            
+        if dukeOpen(color):
+            return [('divination', start)]
+        else:
+            return []
     
-    #def evalSummon(self, start, move, color):
-    
+    def evalSummon(self, start, move, color):
+        open_spaces = dukeSpaces(color)
+        if open_spaces:
+            return [(start, space, self.duke_pos[color])]
+        else:
+            return []
     
     #def evalEscape(self, start, move, color):
     
@@ -196,7 +232,10 @@ class Piece:
         self.flipped = 0
     
     def __repr__(self):
-        rep = self.color+'_'+self.name
+        if self.color:
+            rep = 'Black_'+self.name
+        else:
+            rep = 'White_'+self.name
         return rep
 
 #given a black and white bag of peices, pick the first three (assumed duke, footman, footman)
@@ -205,6 +244,8 @@ def SetupBoard(white_bag, black_bag):
     board = MyBoard()
     white_duke = [0, rnd.randint(0,1)+2]
     black_duke = [5, rnd.randint(0,1)+2]
+    board.duke_pos[0] = white_duke
+    board.duke_pos[1] = black_duke
     board.squares[0][white_duke[1]] = white_bag.popleft()
     board.squares[5][black_duke[1]] = black_bag.popleft()
 
@@ -220,7 +261,9 @@ def SetupBoard(white_bag, black_bag):
     board.squares[wfootman2[0]][wfootman2[1]] = white_bag.popleft()
     board.squares[bfootman1[0]][bfootman1[1]] = black_bag.popleft()
     board.squares[bfootman2[0]][bfootman2[1]] = black_bag.popleft()
-
+    
+    rnd.shuffle(white_bag)
+    rnd.shuffle(black_bag)
     board.white_bag = white_bag
     board.black_bag = black_bag
     board.discard = deque()
@@ -238,8 +281,8 @@ with open('piece_moves.txt') as infile:
     for line in infile:
         stripped = line.strip()
         if stripped in names:
-            white_bag.append(Piece(stripped, 'White'))
-            black_bag.append(Piece(stripped, 'Black'))
+            white_bag.append(Piece(stripped, 0))
+            black_bag.append(Piece(stripped, 1))
             flipped = 0
             continue
         
