@@ -153,6 +153,7 @@ class MyBoard:
             if self.sameColor(position, color):
                 break
             valid_slides.append(position)
+            if #there is a tile here. Also, write a function that takes a position and gives a piece object if there's one there
             position = map(add, position, move)
         if valid_slides:
             valid_moves = [(start, slide, slide) for slide in valid_slides]
@@ -163,8 +164,11 @@ class MyBoard:
     def evalStrike(self, start, move, color):
         position = map(add, start, move)
         if (self.isPosValid(position)) and (not self.sameColor(position, color)):
+            target = self.squares[position[0]][position[1]]
+            if target:
+                return [('Strike', position, start)]
+        else:
             return []
-        return [('Strike', position, start)]
     
     def evalJumpSlide(self, start, move, color):
         valid_slides = []
@@ -251,6 +255,13 @@ class MyBoard:
             self.squares[space[0]][space[1]] = board.bag[color].pop()
             return
         if rand_move[0] == 'Strike':
+            end = rand_move[1]
+            target = board.squares[end[0]][end[1]]
+            start = rand_move[2]
+            originator = board.squares[start[0]][start[1]]
+            self.discard[target.color].append(target)
+            board.squares[end[0]][end[1]] = 0
+            originator.flipped = not originator.flipped
             return
         if rand_move[0] == 'Diviniation':
             return
