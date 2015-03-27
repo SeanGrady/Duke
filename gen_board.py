@@ -3,6 +3,7 @@ from collections import deque
 import itertools as it
 import numpy as np
 from operator import add
+import time
 
 class MyBoard:
     def __init__(self):
@@ -21,10 +22,9 @@ class MyBoard:
             #8: self.escape
             #9: self.ransom
         }
-        self.white_discard = deque()
-        self.black_discard = deque()
+        self.discard = [deque(), deque()]
         self.duke_pos = [[], []]
-
+    
     def __repr__(self):
         square_width = 16
         board_width = self.width
@@ -35,11 +35,11 @@ class MyBoard:
         line_row = '-'*width + '\n'
         for row in self.squares:
             boardview += line_row
-            boardview += blank_row*3
+            boardview += blank_row*2
             for space in row:
                 boardview += '|'
                 if space:
-                    margin = 16 - len(space.__repr__())
+                    margin = square_width - len(space.__repr__())
                     left_margin = margin/2
                     right_margin = margin - left_margin
                     boardview += ' '*left_margin + space.__repr__() + ' '*right_margin
@@ -99,6 +99,9 @@ class MyBoard:
     #The order of nested list comprehensions in python looks weird, but
     #there's a simple explanation for it. Feel free to ask me if you haven't
     #run into it before.
+    def listPiecesColor(self, color):
+        return [tile for row in self.squares for tile in row if (tile and tile.color == color)]
+
     def listPieces(self):
         return [tile for row in self.squares for tile in row if tile]
 
@@ -212,17 +215,50 @@ class MyBoard:
         return valid_moves
     
     
-    def moveTable(self):
+    def moveTable(self, color):
         move_list = []
         for i in range(self.height):
             for j in range(self.width):
                 tile = self.squares[i][j]
-                if tile:
+                if tile and tile.color == color:
+                    #print "finding actions for", tile.name
                     actions_list = self.ennumerateActions(tile, i, j)
                     if actions_list:
                         move_list.extend(actions_list)
+        draw_spaces = self.dukeSpaces(color)
+        if draw_spaces:
+            move_list.extend([('Draw',)]) 
         return move_list
-                        
+    
+    def randomMove(self, color):
+        move_table = self.moveTable(color)
+        rnd.shuffle(move_table)
+        rand_move = move_table.pop()
+        if rand_move[0] == 'Draw':
+            return
+        if rand_move[0] == 'Strike':
+            return
+        if rand_move[0] == 'Diviniation':
+            return
+        start, end, flip = rand_move
+        start_tile = self.squares[start[0]][start[1]]
+        end_tile = self.squares[end[0]][end[1]]
+        if end_tile:
+            self.discard[end_tile.color].append(end_tile)
+        self.squares[end[0]][end[1]] = start_tile
+        self.squares[start[0]][start[1]] = 0
+        self.squares[flip[0]][flip[1]].flipped = not self.squares[flip[0]][flip[1]].flipped
+    
+    def moveRandomly(self):
+        turn = 0
+        iteration = 0
+        while len(self.listPiecesColor(turn)) > 0:
+            self.randomMove(turn)
+            turn = not turn
+            iteration += 1
+            print iteration
+            print self
+            time.sleep(.5)
 
 class Piece:
     def __init__(self, name, color):
@@ -266,7 +302,6 @@ def SetupBoard(white_bag, black_bag):
     rnd.shuffle(black_bag)
     board.white_bag = white_bag
     board.black_bag = black_bag
-    board.discard = deque()
 
     return board
     
