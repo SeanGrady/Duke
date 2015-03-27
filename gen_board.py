@@ -235,6 +235,7 @@ class MyBoard:
         rnd.shuffle(move_table)
         rand_move = move_table.pop()
         if rand_move[0] == 'Draw':
+            True
             return
         if rand_move[0] == 'Strike':
             return
