@@ -24,6 +24,7 @@ class MyBoard:
         }
         self.discard = [deque(), deque()]
         self.duke_pos = [[], []]
+        self.bag = [deque(), deque()]
     
     def __repr__(self):
         square_width = 16
@@ -53,12 +54,18 @@ class MyBoard:
     #find and update the positions of both dukes. Probably don't use this unless
     #it's really necessary. Ideally self.duke_pos will always be accurate. 
     def updateDuke(self):
+        duke_exists = [[],[]]
         for i in range(self.height):
             for j in range(self.width):
                 space = board.squares[i][j]
                 if space:
-                    if space.name == Duke:
+                    if space.name == 'Duke':
+                        duke_exists[space.color] = 1
                         self.duke_pos[space.color] = [i, j]
+        if duke_exists[0] and duke_exists[1]:
+            return 1
+        else:
+            return 0
     
     #return 1 if there are open spaces next to the duke, 0 if not
     def dukeOpen(self, color):
@@ -152,7 +159,7 @@ class MyBoard:
     
     def evalStrike(self, start, move, color):
         position = map(add, start, move)
-        if (not self.sameColor(position, color)) and (self.isPosValid(position)):
+        if (self.isPosValid(position)) and (not self.sameColor(position, color)):
             return []
         return [('Strike', position, start)]
     
@@ -188,15 +195,15 @@ class MyBoard:
         return valid_moves
     
     def evalDivination(self, start, move, color):
-        if dukeOpen(color):
+        if self.dukeOpen(color):
             return [('divination', start)]
         else:
             return []
     
     def evalSummon(self, start, move, color):
-        open_spaces = dukeSpaces(color)
+        open_spaces = self.dukeSpaces(color)
         if open_spaces:
-            return [(start, space, self.duke_pos[color])]
+            return [(start, space, self.duke_pos[color]) for space in open_spaces]
         else:
             return []
     
@@ -227,7 +234,7 @@ class MyBoard:
                         move_list.extend(actions_list)
         draw_spaces = self.dukeSpaces(color)
         if draw_spaces:
-            move_list.extend([('Draw',)]) 
+            move_list.extend([('Draw', draw_spaces)]) 
         return move_list
     
     def randomMove(self, color):
@@ -235,7 +242,10 @@ class MyBoard:
         rnd.shuffle(move_table)
         rand_move = move_table.pop()
         if rand_move[0] == 'Draw':
-            True
+            draw_spaces = rand_move[1]
+            rnd.shuffle(draw_spaces)
+            space = draw_spaces.pop()
+            self.squares[space[0]][space[1]] = board.bag[color].pop()
             return
         if rand_move[0] == 'Strike':
             return
@@ -260,6 +270,9 @@ class MyBoard:
             print iteration
             print self
             time.sleep(.5)
+            if not self.updateDuke():
+                print "Someone wins!"
+                return
 
 class Piece:
     def __init__(self, name, color):
@@ -301,8 +314,8 @@ def SetupBoard(white_bag, black_bag):
     
     rnd.shuffle(white_bag)
     rnd.shuffle(black_bag)
-    board.white_bag = white_bag
-    board.black_bag = black_bag
+    board.bag[0] = white_bag
+    board.bag[1] = black_bag
 
     return board
     
