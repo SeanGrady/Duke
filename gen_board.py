@@ -5,6 +5,9 @@ import numpy as np
 from operator import add
 import time
 
+#I should probably write a readme for this shit but I aint yet so holla if you have
+#any questions.
+
 class MyBoard:
     def __init__(self):
         self.squares = [[deque() for x in range(6)] for y in range(6)]
