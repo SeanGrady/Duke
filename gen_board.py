@@ -4,13 +4,15 @@ import itertools as it
 import numpy as np
 from operator import add
 import time
+import copy
 
-#I should probably write a readme for this shit but I aint yet so holla if you have
-#any questions.
+#I should probably write a readme for this shit but I aint yet so holla if you have any
+#questions.
 
 class MyBoard:
     def __init__(self):
         self.squares = [[deque() for x in range(6)] for y in range(6)]
+        self.saved_squares = copy.deepcopy(self.squares)
         self.width = 6
         self.height = 6
         self.eval_dict = {
@@ -54,8 +56,17 @@ class MyBoard:
         boardview += line_row
         return boardview
     
-    #find and update the positions of both dukes. Probably don't use this unless
-    #it's really necessary. Ideally self.duke_pos will always be accurate. 
+    #given a position of the form [row, column], return the piece object at that location
+    #or 0 if the square is empty.
+    def returnPiece(self, position):
+        piece = self.squares[position[0]][position[1]]
+        if piece:
+            return piece
+        else:
+            return 0
+    
+    #find and update the positions of both dukes. Return 1 if both are still on the board
+    #or 0 if either or both are not. 
     def updateDuke(self):
         duke_exists = [[],[]]
         for i in range(self.height):
@@ -70,22 +81,23 @@ class MyBoard:
         else:
             return 0
     
-    #return 1 if there are open spaces next to the duke, 0 if not
+    #return 1 if there are open spaces next to the specified duke, 0 if not. Terminates on finding
+    #an open space, so is on average faster than dukeSpaces
     def dukeOpen(self, color):
         adjct = [[1, 0], [0, 1], [-1, 0], [0, -1]]
         positions = [map(add, adj, self.duke_pos[color]) for adj in adjct]
         for position in positions:
-            if self.isPosValid(position) and not self.squares[position[0]][position[1]]:
+            if self.isPosValid(position) and not self.returnPiece(position):
                 return 1
         return 0
     
-    #return clear spaces next to the specified color duke, if any
+    #return open spaces next to the specified duke, if any
     def dukeSpaces(self, color):
         open_spaces = []
         adjct = [[1, 0], [0, 1], [-1, 0], [0, -1]]
         positions = [map(add, adj, self.duke_pos[color]) for adj in adjct]
         for position in positions:
-            if self.isPosValid(position) and not self.squares[position[0]][position[1]]:
+            if self.isPosValid(position) and not self.returnPiece(position):
                 open_spaces.append(position)
         return open_spaces
     
@@ -96,27 +108,28 @@ class MyBoard:
         if position[1] not in range(self.width):
             return 0
         return 1
-
+    
     #given a color and a position, check if there is a peice of the same color at position
     def sameColor(self, position, color):
-        tile = self.squares[position[0]][position[1]]
+        tile = self.returnPiece(position)
         if tile and tile.color == color:
             return 1
         else:
             return 0    
-
-    #List all the pieces currently on the board.
-    #The order of nested list comprehensions in python looks weird, but
-    #there's a simple explanation for it. Feel free to ask me if you haven't
-    #run into it before.
-    def listPiecesColor(self, color):
-        return [tile for row in self.squares for tile in row if (tile and tile.color == color)]
-
+    
+    #List all the pieces currently on the board. The order of nested list comprehensions
+    #in python looks weird, but there's a simple explanation for it. Feel free to ask me
+    #if you haven't run into it before.
     def listPieces(self):
         return [tile for row in self.squares for tile in row if tile]
-
-    #given a starting postion, a piece color and a move,
-    #return wether it's legal and if it's legal return the destination square 
+    
+    #As listPieces but only lists pieces of the specified color.
+    def listPiecesColor(self, color):
+        return [tile for row in self.squares for tile in row if (tile and tile.color == color)]
+    
+    #Given a starting postion, a piece color and a move, return the move packaged as a
+    #list of the form [(starting place, ending place, tile to flip)], or an empty list if
+    #the move is not legal.
     def evalMove(self, start, move, color):
         step = move[:2]
         num_steps = move[2]
@@ -125,7 +138,7 @@ class MyBoard:
             position = map(add, position, step)
             if not self.isPosValid(position):
                 return []
-            if self.squares[position[0]][position[1]]:
+            if self.returnPiece(position):
                 return []
         position = map(add, position, step)
         if not self.isPosValid(position):
@@ -133,9 +146,10 @@ class MyBoard:
         if self.sameColor(position, color):
             return []
         return [(start, position, position)]
-
-    #given a starting postion, a piece color and a jump,
-    #return wether it's legal and if it's legal return the destination square
+    
+    #Given a starting postion, a piece color and a jump, return the action packaged as a
+    #list of the form [(starting place, ending place, tile to flip)], or an empty list if
+    #the move is not legal.
     def evalJump(self, start, move, color):
         destination = map(add, start, move)
         if not self.isPosValid(destination):
@@ -143,9 +157,10 @@ class MyBoard:
         if self.sameColor(destination, color):
             return []
         return [(start, destination, destination)]
-
-    #given a starting postion, a piece color and a slide,
-    #return a list of all legal moves, or an empty list if there are none.
+    
+    #Given a starting postion, a piece color and a slide, return the possible slides
+    #packaged as a list of tuples of the form (starting place, ending place, tile to flip),
+    #or an empty list if there are no legal slides.
     def evalSlide(self, start, move, color):
         valid_slides = []
         position = map(add, start, move)
@@ -153,7 +168,8 @@ class MyBoard:
             if self.sameColor(position, color):
                 break
             valid_slides.append(position)
-            if #there is a tile here. Also, write a function that takes a position and gives a piece object if there's one there
+            if self.returnPiece(position):
+                break
             position = map(add, position, move)
         if valid_slides:
             valid_moves = [(start, slide, slide) for slide in valid_slides]
@@ -161,15 +177,20 @@ class MyBoard:
         else:
             return []
     
+    #Given a starting position, a piece color and a strike, return a strike move packaged
+    #as a list of the form [('Strike', target, tile to flip)] if the strike is valid, or
+    #an empty list if it is not.
     def evalStrike(self, start, move, color):
         position = map(add, start, move)
         if (self.isPosValid(position)) and (not self.sameColor(position, color)):
-            target = self.squares[position[0]][position[1]]
+            target = self.returnPiece(position)
             if target:
                 return [('Strike', position, start)]
-        else:
-            return []
+        return []
     
+    #Given a starting postion, a piece color and a jump slide, return the possible slides
+    #packaged as a list of tuples of the form (starting place, ending place, tile to flip),
+    #or an empty list if there are no legal jump slides.
     def evalJumpSlide(self, start, move, color):
         valid_slides = []
         first_position = map(add, start, move)
@@ -187,8 +208,12 @@ class MyBoard:
         else:
             return []
     
+    #Given a list of command squares, return a list of all possible command square moves
+    #each packaged as a tuple of the form (tile to move, place to move it, tile to flip).
+    #If there are no valid command square moves, return an empty list.
     def evalCommandSquare(self, start, move, color):
-        squares = zip(*[iter(move)] * 2)                #lol wut
+        command_squares = zip(*[iter(move)] * 2)   #lol wat
+        squares = [map(add, square, start) for square in command_squares]
         allies = []
         destinations = []
         valid_moves = []
@@ -201,12 +226,18 @@ class MyBoard:
         valid_moves = [(ally, destination, start) for ally in allies for destination in destinations]
         return valid_moves
     
+    #Given a divination move, return a list of the form [('Diviniation', start)] if it is
+    #possible to draw pieces, or an empty list if it is not.
     def evalDivination(self, start, move, color):
-        if self.dukeOpen(color):
-            return [('divination', start)]
-        else:
+        if not self.bag[color]:
             return []
+        if self.dukeOpen(color):
+            return [('Divination', start)]
+        return []
     
+    #Given a summon move, return a list of all possible summon actions each of the form
+    #(tile to summon, place to summon it to, tile to flip), or an empty list if thre are
+    #possible summon actions.
     def evalSummon(self, start, move, color):
         open_spaces = self.dukeSpaces(color)
         if open_spaces:
@@ -216,10 +247,65 @@ class MyBoard:
     
     #def evalEscape(self, start, move, color):
     
-    
     #def evalRansom(self, start, move, color):
     
     
+    #Determine if the duke of the specified side is in guard or not.
+    def inGuard(self, color):
+        enemy_moves = self.moveTable(not color)
+        for move in enemy_moves:
+            if move[0] == 'Draw':
+                continue
+            if move[0] == 'Diviniation':
+                continue
+            target = self.returnPiece(move[1])
+            if target and target.name == 'Duke' and target.color == color:
+                return 1
+        return 0
+    
+    def leaveGuard(self, color):
+        self.saved_squares = copy.deepcopy(self.squares)
+        possible_moves = self.moveTable(color)
+    
+    def makeMove(self, move, color):
+        if move[0] == 'Draw':
+            draw_spaces = move[1]
+            rnd.shuffle(draw_spaces)
+            space = draw_spaces.pop()
+            self.squares[space[0]][space[1]] = board.bag[color].pop()
+            return
+        if move[0] == 'Strike':
+            end = move[1]
+            target = self.returnPiece(end)
+            start = move[2]
+            originator = self.returnPiece(start)
+            self.discard[target.color].append(target)
+            board.squares[end[0]][end[1]] = 0
+            originator.flipped = not originator.flipped
+            return
+        if move[0] == 'Divination':
+            open_spaces = self.dukeSpaces(color)
+            rnd.shuffle(open_spaces)
+            space = open_spaces.pop()
+            available_pieces = [self.bag[color].pop() for i in range(3) if self.bag[color]]
+            rnd.shuffle(available_pieces)
+            piece = available_pieces.pop()
+            self.squares[space[0]][space[1]] = piece
+            self.bag[color].extend(available_pieces)
+            rnd.shuffle(self.bag[color])
+            return
+        #print "move is: ", rand_move
+        start, end, flip = move
+        start_tile = self.returnPiece(start)
+        end_tile = self.returnPiece(end)
+        if end_tile:
+            self.discard[end_tile.color].append(end_tile)
+        self.squares[end[0]][end[1]] = start_tile
+        self.squares[start[0]][start[1]] = 0
+        self.squares[flip[0]][flip[1]].flipped = not self.squares[flip[0]][flip[1]].flipped
+    
+    #Given a tile and a location, return a list of all the moves that tile can make
+    #repesented as tuples, or an empty list if there are none.
     def ennumerateActions(self, tile, row, column):
         action_list = tile.actions[tile.flipped]
         start = [row, column]
@@ -228,7 +314,7 @@ class MyBoard:
             valid_moves.extend(self.eval_dict[action[0]](start, action[1:], tile.color))
         return valid_moves
     
-    
+    #Create a table of all possible moves for the specified side as a list of move tuples.
     def moveTable(self, color):
         move_list = []
         for i in range(self.height):
@@ -240,53 +326,40 @@ class MyBoard:
                     if actions_list:
                         move_list.extend(actions_list)
         draw_spaces = self.dukeSpaces(color)
-        if draw_spaces:
+        if draw_spaces and self.bag[color]:
             move_list.extend([('Draw', draw_spaces)]) 
         return move_list
     
+    #Pick a move at random out of all possible moves for the specified side and make it.
     def randomMove(self, color):
+        global iteration
+        #if self.inGuard(color):
+        #    print "I'm in guard!", color, iteration
         move_table = self.moveTable(color)
+        if not move_table:
+            print "Someone has made a stupid and has no more moves.", int(color)
+            print self
+            raise SystemExit
         rnd.shuffle(move_table)
         rand_move = move_table.pop()
-        if rand_move[0] == 'Draw':
-            draw_spaces = rand_move[1]
-            rnd.shuffle(draw_spaces)
-            space = draw_spaces.pop()
-            self.squares[space[0]][space[1]] = board.bag[color].pop()
-            return
-        if rand_move[0] == 'Strike':
-            end = rand_move[1]
-            target = board.squares[end[0]][end[1]]
-            start = rand_move[2]
-            originator = board.squares[start[0]][start[1]]
-            self.discard[target.color].append(target)
-            board.squares[end[0]][end[1]] = 0
-            originator.flipped = not originator.flipped
-            return
-        if rand_move[0] == 'Diviniation':
-            return
-        start, end, flip = rand_move
-        start_tile = self.squares[start[0]][start[1]]
-        end_tile = self.squares[end[0]][end[1]]
-        if end_tile:
-            self.discard[end_tile.color].append(end_tile)
-        self.squares[end[0]][end[1]] = start_tile
-        self.squares[start[0]][start[1]] = 0
-        self.squares[flip[0]][flip[1]].flipped = not self.squares[flip[0]][flip[1]].flipped
+        self.makeMove(rand_move, color)
     
+    #Make random moves, alternating sides, until either duke is captured. Keeps track of
+    #how many total moves are made.
     def moveRandomly(self):
         turn = 0
+        global iteration
         iteration = 0
         while len(self.listPiecesColor(turn)) > 0:
             self.randomMove(turn)
             turn = not turn
             iteration += 1
-            print iteration
-            print self
-            time.sleep(.5)
+            #print iteration
+            #print self
+            #time.sleep(.5)
             if not self.updateDuke():
-                print "Someone wins!"
-                return
+                #print "Someone wins! Turn ", iteration
+                return iteration
 
 class Piece:
     def __init__(self, name, color):
@@ -302,8 +375,9 @@ class Piece:
             rep = 'White_'+self.name
         return rep
 
-#given a black and white bag of peices, pick the first three (assumed duke, footman, footman)
-#from each bag and place them on the board in starting positions at random.
+#given a black and white bag of peices, pick the first three, which are determined by the
+#peice_moves.txt file, from each bag and place them on the board in starting positions at
+#random.
 def SetupBoard(white_bag, black_bag):
     board = MyBoard()
     white_duke = [0, rnd.randint(0,1)+2]
@@ -364,5 +438,17 @@ with open('piece_moves.txt') as infile:
         black_bag[-1].actions[flipped].append(black_move)
 
 board = SetupBoard(white_bag, black_bag)
+
+
+init_board = copy.deepcopy(board)
+iteration = 0
+num_turns = 0
+num_games = 10000
+a = time.time()
+for i in range(num_games):
+    board = copy.deepcopy(init_board)
+    num_turns += board.moveRandomly()
+b = time.time()
+print "1000 games took: ", b - a, '\nAverage number of turns per game: ', round(num_turns/float(num_games))
 
 
