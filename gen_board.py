@@ -5,6 +5,7 @@ import numpy as np
 from operator import add
 import time
 import copy
+from matplotlib import pyplot as plt
 
 #I should probably write a readme for this shit but I aint yet so holla if you have any
 #questions.
@@ -266,6 +267,15 @@ class MyBoard:
     def leaveGuard(self, color):
         self.saved_squares = copy.deepcopy(self.squares)
         possible_moves = self.moveTable(color)
+        rnd.shuffle(possible_moves)
+        for move in possible_moves:
+            self.makeMove(move, color)
+            if not self.inGuard(color):
+                return
+            else:
+                self.squares = copy.deepcopy(self.saved_squares)
+        return -1
+            
     
     def makeMove(self, move, color):
         if move[0] == 'Draw':
@@ -339,7 +349,7 @@ class MyBoard:
         if not move_table:
             print "Someone has made a stupid and has no more moves.", int(color)
             print self
-            raise SystemExit
+            return -1
         rnd.shuffle(move_table)
         rand_move = move_table.pop()
         self.makeMove(rand_move, color)
@@ -351,15 +361,28 @@ class MyBoard:
         global iteration
         iteration = 0
         while len(self.listPiecesColor(turn)) > 0:
-            self.randomMove(turn)
+            error1 = error2 = 0
+            if self.inGuard(turn):
+                error1 = self.leaveGuard(turn)
+            else:
+                error2 = self.randomMove(turn)
+            if error1:
+                print turn, " is in chekcmate!. ", iteration
+                break
+            if error2:
+                print turn, " is out of moves! ", iteration
+                time.sleep(.2)
+                break
             turn = not turn
             iteration += 1
             #print iteration
             #print self
             #time.sleep(.5)
             if not self.updateDuke():
-                #print "Someone wins! Turn ", iteration
+                print "Someone wins! Turn ", iteration
                 return iteration
+        #print "Something went wrong! Turn ", iteration
+        return iteration
 
 class Piece:
     def __init__(self, name, color):
@@ -443,12 +466,19 @@ board = SetupBoard(white_bag, black_bag)
 init_board = copy.deepcopy(board)
 iteration = 0
 num_turns = 0
+length_list = []
 num_games = 10000
 a = time.time()
 for i in range(num_games):
     board = copy.deepcopy(init_board)
-    num_turns += board.moveRandomly()
+    length_list.append(board.moveRandomly())
 b = time.time()
-print "1000 games took: ", b - a, '\nAverage number of turns per game: ', round(num_turns/float(num_games))
-
+print "1000 games took: ", b - a, '\nAverage number of turns per game: ', round(float(sum(length_list))/num_games)
+max_turns = max(length_list)
+histogram = [0]*(max_turns + 1)
+for length in length_list:
+    print length
+    histogram[length] += 1
+plt.plot(range(max_turns + 1), histogram)
+plt.show()
 
