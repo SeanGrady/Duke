@@ -362,10 +362,10 @@ class MyBoard:
         iteration = 0
         while len(self.listPiecesColor(turn)) > 0:
             error1 = error2 = 0
-            if self.inGuard(turn):
-                error1 = self.leaveGuard(turn)
-            else:
-                error2 = self.randomMove(turn)
+            #if self.inGuard(turn):
+            #    error1 = self.leaveGuard(turn)
+            #else:
+            error2 = self.randomMove(turn)
             if error1:
                 print turn, " is in chekcmate!. ", iteration
                 break
@@ -379,7 +379,7 @@ class MyBoard:
             #print self
             #time.sleep(.5)
             if not self.updateDuke():
-                print "Someone wins! Turn ", iteration
+                #print "Someone wins! Turn ", iteration
                 return iteration
         #print "Something went wrong! Turn ", iteration
         return iteration
@@ -467,7 +467,7 @@ init_board = copy.deepcopy(board)
 iteration = 0
 num_turns = 0
 length_list = []
-num_games = 10000
+num_games = 1000
 a = time.time()
 for i in range(num_games):
     board = copy.deepcopy(init_board)
@@ -477,7 +477,7 @@ print "1000 games took: ", b - a, '\nAverage number of turns per game: ', round(
 max_turns = max(length_list)
 histogram = [0]*(max_turns + 1)
 for length in length_list:
-    print length
+    #print length
     histogram[length] += 1
 plt.plot(range(max_turns + 1), histogram)
 plt.show()
