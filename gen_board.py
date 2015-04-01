@@ -12,10 +12,10 @@ from matplotlib import pyplot as plt
 
 class MyBoard:
     def __init__(self):
-        self.squares = [[deque() for x in range(6)] for y in range(6)]
-        self.saved_squares = copy.deepcopy(self.squares)
         self.width = 6
         self.height = 6
+        self.squares = [[deque() for x in range(self.width)] for y in range(self.height)]
+        self.saved_squares = copy.deepcopy(self.squares)
         self.eval_dict = {
             0: self.evalMove,
             1: self.evalJump,
@@ -31,6 +31,7 @@ class MyBoard:
         self.discard = [deque(), deque()]
         self.duke_pos = [[], []]
         self.bag = [deque(), deque()]
+        self.viewable_board = [[0 for x in range(self.width)] for y in range(self.height)]
     
     def __repr__(self):
         square_width = 16
@@ -57,6 +58,27 @@ class MyBoard:
         boardview += line_row
         return boardview
     
+    '''
+    #Work in progress for a better visual representation of the board than __repr__().
+    #Relies on building up 2-D string representations of each piece and then figuring out
+    #what each line of the final representation should be by looking at all the pieces
+    #that intersect that line.
+    def viewBoard(self):
+        square_width = 16
+        square_height = 6
+        empty_piece = [' '*square_width for i in range(square_height)]
+        empty_move_array = [['' for i in range(square_width)] for j in range(square_height)]
+        #loops to build viewable_board
+        for i in range(height):
+            for j in range(width):
+                if self.squares[i][j]:
+                    piece = self.squares[i][j]
+                else:
+                    #use the string array for no piece
+                self.viewable_board[i][j] = #string array
+        #loops to make it one string
+    '''
+    
     #given a position of the form [row, column], return the piece object at that location
     #or 0 if the square is empty.
     def returnPiece(self, position):
@@ -82,8 +104,8 @@ class MyBoard:
         else:
             return 0
     
-    #return 1 if there are open spaces next to the specified duke, 0 if not. Terminates on finding
-    #an open space, so is on average faster than dukeSpaces
+    #Return 1 if there are open spaces next to the specified duke, 0 if not. Terminates on
+    #finding an open space, so is on average faster than dukeSpaces.
     def dukeOpen(self, color):
         adjct = [[1, 0], [0, 1], [-1, 0], [0, -1]]
         positions = [map(add, adj, self.duke_pos[color]) for adj in adjct]
@@ -367,7 +389,9 @@ class MyBoard:
             else:
                 error2 = self.randomMove(turn)
             if error1:
-                print turn, " is in chekcmate!. ", iteration
+                print turn, " is in checkmate!. ", iteration
+                print self
+                raw_input("press enter to continue")
                 break
             if error2:
                 print turn, " is out of moves! ", iteration
@@ -430,39 +454,41 @@ def SetupBoard(white_bag, black_bag):
 
     return board
     
+def setupBags():
+    with open('piece_names.txt') as infile:
+        names = [line.strip() for line in infile]
 
-with open('piece_names.txt') as infile:
-    names = [line.strip() for line in infile]
+    white_bag = deque([])
+    black_bag = deque([])
+    flipped = 0
+    with open('piece_moves.txt') as infile:
+        for line in infile:
+            stripped = line.strip()
+            if stripped in names:
+                white_bag.append(Piece(stripped, 0))
+                black_bag.append(Piece(stripped, 1))
+                flipped = 0
+                continue
+            
+            if stripped == 'FLIP':
+                flipped = 1
+                continue
+            
+            ints = [int(item) for item in stripped.split()]
+            move = ints
+            black_move = [move[0]]
+            black_move.extend([-coord for coord in move[1:3]])
+            if len(move) > 3:
+                black_move.append(move[3])
+            
+            white_bag[-1].actions[flipped].append(move)
+            black_bag[-1].actions[flipped].append(black_move)
+    return white_bag, black_bag
 
-white_bag = deque([])
-black_bag = deque([])
-flipped = 0
-with open('piece_moves.txt') as infile:
-    for line in infile:
-        stripped = line.strip()
-        if stripped in names:
-            white_bag.append(Piece(stripped, 0))
-            black_bag.append(Piece(stripped, 1))
-            flipped = 0
-            continue
-        
-        if stripped == 'FLIP':
-            flipped = 1
-            continue
-        
-        ints = [int(item) for item in stripped.split()]
-        move = ints
-        black_move = [move[0]]
-        black_move.extend([-coord for coord in move[1:3]])
-        if len(move) > 3:
-            black_move.append(move[3])
-        
-        white_bag[-1].actions[flipped].append(move)
-        black_bag[-1].actions[flipped].append(black_move)
-
+white_bag, black_bag = setupBags()
 board = SetupBoard(white_bag, black_bag)
 
-
+'''
 init_board = copy.deepcopy(board)
 iteration = 0
 num_turns = 0
@@ -481,4 +507,4 @@ for length in length_list:
     histogram[length] += 1
 plt.plot(range(max_turns + 1), histogram)
 plt.show()
-
+'''
