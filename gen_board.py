@@ -456,7 +456,7 @@ class MyBoard:
                 with open(filename, 'w') as infile:
                     
             if not self.updateDuke():
-                print "Someone wins! Turn ", iteration
+                #print "Someone wins! Turn ", iteration
                 return iteration
         #print "Something went wrong! Turn ", iteration
         return iteration
