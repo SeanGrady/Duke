@@ -126,7 +126,7 @@ class MyBoard:
         duke_exists = [[],[]]
         for i in range(self.height):
             for j in range(self.width):
-                space = board.squares[i][j]
+                space = self.squares[i][j]
                 if space:
                     if space.name == 'Duke':
                         duke_exists[space.color] = 1
@@ -341,7 +341,7 @@ class MyBoard:
             draw_spaces = move[1]
             rnd.shuffle(draw_spaces)
             space = draw_spaces.pop()
-            self.squares[space[0]][space[1]] = board.bag[color].pop()
+            self.squares[space[0]][space[1]] = self.bag[color].pop()
             return
         if move[0] == 'Strike':
             end = move[1]
@@ -349,7 +349,7 @@ class MyBoard:
             start = move[2]
             originator = self.returnPiece(start)
             self.discard[target.color].append(target)
-            board.squares[end[0]][end[1]] = 0
+            self.squares[end[0]][end[1]] = 0
             originator.flipped = not originator.flipped
             return
         if move[0] == 'Divination':
@@ -452,9 +452,9 @@ class MyBoard:
                 print iteration
                 print self
                 time.sleep(delay)
-            if saved == 1:
-                with open(filename, 'w') as infile:
-                    
+            #if saved == 1:
+                #with open(filename, 'w') as infile:
+                    #save the game state somehow
             if not self.updateDuke():
                 #print "Someone wins! Turn ", iteration
                 return iteration
