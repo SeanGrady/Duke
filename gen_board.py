@@ -32,8 +32,16 @@ class MyBoard:
         self.duke_pos = [[], []]
         self.bag = [deque(), deque()]
         self.viewable_board = [[0 for x in range(self.width)] for y in range(self.height)]
+        self.color_dict = {
+            0: "White",
+            1: "Black"
+        }
     
     def __repr__(self):
+        board = self.viewBoard()
+        return board
+    #old implementation of __repr__
+    '''
         square_width = 16
         board_width = self.width
         width = square_width*board_width + 7
@@ -57,27 +65,51 @@ class MyBoard:
             boardview += blank_row*3
         boardview += line_row
         return boardview
-    
     '''
+    
+    def saveState(self):
+        self.saved_squares = copy.deepcopy(self.squares)
+        self.saved_bag = copy.deepcopy(self.bag)
+        self.saved_discard = copy.deepcopy(self.discard)
+        self.saved_duke_pos = copy.deepcopy(self.duke_pos)
+    
+    def loadState(self):
+        self.squares = copy.deepcopy(self.saved_squares)
+        self.bag = copy.deepcopy(self.saved_bag)
+        self.discard = copy.deepcopy(self.saved_discard)
+        self.duke = copy.deepcopy(self.saved_duke_pos)
+    
     #Work in progress for a better visual representation of the board than __repr__().
-    #Relies on building up 2-D string representations of each piece and then figuring out
+    #Relies on accessing the 2-D string representations of each piece and then figuring out
     #what each line of the final representation should be by looking at all the pieces
     #that intersect that line.
     def viewBoard(self):
-        square_width = 16
+        square_width = 15
         square_height = 6
         empty_piece = [' '*square_width for i in range(square_height)]
-        empty_move_array = [['' for i in range(square_width)] for j in range(square_height)]
+        width = square_width*self.width + 7
+        line_row = '-'*width + '\n'
+        board_view = ''
         #loops to build viewable_board
-        for i in range(height):
-            for j in range(width):
+        for i in range(self.height):
+            for j in range(self.width):
                 if self.squares[i][j]:
                     piece = self.squares[i][j]
+                    self.viewable_board[i][j] = piece.str_array[piece.flipped]
+                    if piece.color == 0:
+                        piece
                 else:
-                    #use the string array for no piece
-                self.viewable_board[i][j] = #string array
-        #loops to make it one string
-    '''
+                    self.viewable_board[i][j] = empty_piece
+            board_view += line_row
+            for k in range(square_height):
+                next_line = '|'
+                for j in range(self.width):
+                    next_line += self.viewable_board[i][j][k] + '|'
+                next_line += '\n'
+                board_view += next_line
+        board_view += line_row
+        return board_view
+    
     
     #given a position of the form [row, column], return the piece object at that location
     #or 0 if the square is empty.
@@ -224,6 +256,8 @@ class MyBoard:
             if self.sameColor(position, color):
                 break
             valid_slides.append(position)
+            if self.returnPiece(position):
+                break
             position = map(add, position, move)
         if valid_slides:
             valid_moves = [(start, slide, slide) for slide in valid_slides]
@@ -283,19 +317,22 @@ class MyBoard:
                 continue
             target = self.returnPiece(move[1])
             if target and target.name == 'Duke' and target.color == color:
+                #print move
                 return 1
         return 0
     
     def leaveGuard(self, color):
-        self.saved_squares = copy.deepcopy(self.squares)
+        self.saveState()
         possible_moves = self.moveTable(color)
         rnd.shuffle(possible_moves)
         for move in possible_moves:
             self.makeMove(move, color)
+            self.updateDuke()
             if not self.inGuard(color):
                 return
             else:
-                self.squares = copy.deepcopy(self.saved_squares)
+                self.loadState()
+                self.updateDuke()
         return -1
             
     
@@ -364,44 +401,56 @@ class MyBoard:
     
     #Pick a move at random out of all possible moves for the specified side and make it.
     def randomMove(self, color):
-        global iteration
+        #global iteration
         #if self.inGuard(color):
         #    print "I'm in guard!", color, iteration
         move_table = self.moveTable(color)
         if not move_table:
-            print "Someone has made a stupid and has no more moves.", int(color)
-            print self
+            #print self.color_dict[color], " has made a stupid and has no more moves."
+            #print self
+            #raw_input("press enter to continue")
             return -1
+        self.saveState()
         rnd.shuffle(move_table)
-        rand_move = move_table.pop()
-        self.makeMove(rand_move, color)
+        for move in move_table:
+            self.makeMove(move, color)
+            if self.inGuard(color):
+                self.loadState()
+                continue
+            return 0
+        #print self.color_dict[color], " cannot move without going into guard."
+        #print self
+        #raw_input("press enter to continue")
+        return -1
+                
     
     #Make random moves, alternating sides, until either duke is captured. Keeps track of
     #how many total moves are made.
-    def moveRandomly(self):
+    def moveRandomly(self, saved = 0):
         turn = 0
         global iteration
         iteration = 0
-        while len(self.listPiecesColor(turn)) > 0:
+        while (len(self.listPiecesColor(turn)) > 0) and (iteration < 1000):
             error1 = error2 = 0
             if self.inGuard(turn):
                 error1 = self.leaveGuard(turn)
             else:
                 error2 = self.randomMove(turn)
             if error1:
-                print turn, " is in checkmate!. ", iteration
-                print self
-                raw_input("press enter to continue")
+                #print self.color_dict[turn], " is in checkmate!. ", iteration
+                #print self
+                #raw_input("press enter to continue")
                 break
             if error2:
-                print turn, " is out of moves! ", iteration
-                time.sleep(.2)
+                #print self.color_dict[turn], " cannot make a move, and has lost.", iteration
+                #print self
+                #raw_input("press enter to continue")
                 break
             turn = not turn
             iteration += 1
-            #print iteration
-            #print self
-            #time.sleep(.5)
+            print iteration
+            print self
+            time.sleep(.5)
             if not self.updateDuke():
                 print "Someone wins! Turn ", iteration
                 return iteration
@@ -414,6 +463,7 @@ class Piece:
         self.name = name
         self.actions = [[],[]]
         self.flipped = 0
+        self.str_array = [deque(), deque()]
     
     def __repr__(self):
         if self.color:
@@ -421,6 +471,7 @@ class Piece:
         else:
             rep = 'White_'+self.name
         return rep
+
 
 #given a black and white bag of peices, pick the first three, which are determined by the
 #peice_moves.txt file, from each bag and place them on the board in starting positions at
@@ -483,28 +534,71 @@ def setupBags():
             
             white_bag[-1].actions[flipped].append(move)
             black_bag[-1].actions[flipped].append(black_move)
+
+    flipped = 0
+    with open('piece_strings.txt') as infile:
+        for line in infile:
+            stripped = line.strip()
+            line = line.rstrip('\n')
+            if stripped in names:
+                white_pieces = [piece for piece in white_bag if piece.name == stripped]
+                black_pieces = [piece for piece in black_bag if piece.name == stripped]
+                flipped = 0
+                continue
+            
+            if stripped == 'FLIP':
+                flipped = 1
+                continue
+            
+            for piece in white_pieces:
+                piece.str_array[flipped].append(line)
+            for piece in black_pieces:
+                piece.str_array[flipped].appendleft(line[::-1])
+    
+    square_width = 15
+    for white, black in zip(white_bag, black_bag):
+        white.str_array[0] = deque(reversed(white.str_array[0]))
+        white.str_array[1] = deque(reversed(white.str_array[1]))
+        black.str_array[0] = deque(reversed(white.str_array[0]))
+        black.str_array[1] = deque(reversed(white.str_array[1]))
+        white_name, black_name = 'Wh_' + white.name, 'Bl_' + black.name
+        margin = square_width - len(white_name)
+        left_margin = margin/2
+        right_margin = margin - left_margin
+        white_string = ' '*left_margin + white_name + ' '*right_margin
+        black_string = ' '*left_margin + black_name + ' '*right_margin
+        white.str_array[0].appendleft(white_string)
+        white.str_array[1].appendleft(white_string)
+        black.str_array[0].append(black_string)
+        black.str_array[1].append(black_string)
+    
     return white_bag, black_bag
 
-white_bag, black_bag = setupBags()
-board = SetupBoard(white_bag, black_bag)
+def timeGames(num_games):
+    white_bag, black_bag = setupBags()
+    board = SetupBoard(white_bag, black_bag)
+    init_board = copy.deepcopy(board)
+    iteration = 0
+    num_turns = 0
+    length_list = []
+    a = time.time()
+    for i in range(num_games):
+        board = copy.deepcopy(init_board)
+        length_list.append(board.moveRandomly())
+    b = time.time()
+    length_list = [game for game in length_list if game < 1000]
+    diff = num_games - len(length_list)
+    valid = len(length_list)
+    print valid, " out of ", num_games, " games took: ", b - a, '\nAverage number of turns per game: ', round(float(sum(length_list))/valid)
+    return length_list
 
-'''
-init_board = copy.deepcopy(board)
-iteration = 0
-num_turns = 0
-length_list = []
-num_games = 10000
-a = time.time()
-for i in range(num_games):
-    board = copy.deepcopy(init_board)
-    length_list.append(board.moveRandomly())
-b = time.time()
-print "1000 games took: ", b - a, '\nAverage number of turns per game: ', round(float(sum(length_list))/num_games)
-max_turns = max(length_list)
-histogram = [0]*(max_turns + 1)
-for length in length_list:
-    print length
-    histogram[length] += 1
-plt.plot(range(max_turns + 1), histogram)
-plt.show()
-'''
+def plotGames(length_list):
+    max_turns = max(length_list)
+    histogram = [0]*(max_turns + 1)
+    for length in length_list:
+        print length
+        histogram[length] += 1
+    plt.plot(range(max_turns + 1), histogram)
+    plt.show()
+
+
