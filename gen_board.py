@@ -426,7 +426,7 @@ class MyBoard:
     
     #Make random moves, alternating sides, until either duke is captured. Keeps track of
     #how many total moves are made.
-    def moveRandomly(self, saved = 0):
+    def moveRandomly(self, saved = 0, filename = 'saved_game.txt', printed = 0, delay = 0.75):
         turn = 0
         global iteration
         iteration = 0
@@ -448,9 +448,13 @@ class MyBoard:
                 break
             turn = not turn
             iteration += 1
-            print iteration
-            print self
-            time.sleep(.5)
+            if printed:
+                print iteration
+                print self
+                time.sleep(delay)
+            if saved == 1:
+                with open(filename, 'w') as infile:
+                    
             if not self.updateDuke():
                 print "Someone wins! Turn ", iteration
                 return iteration
