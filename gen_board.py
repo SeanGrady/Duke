@@ -6,6 +6,7 @@ from operator import add
 import time
 import copy
 from matplotlib import pyplot as plt
+import cPickle as pickle
 
 #I should probably write a readme for this shit but I aint yet so holla if you have any
 #questions.
@@ -79,10 +80,17 @@ class MyBoard:
         self.discard = copy.deepcopy(self.saved_discard)
         self.duke = copy.deepcopy(self.saved_duke_pos)
     
-    #Work in progress for a better visual representation of the board than __repr__().
-    #Relies on accessing the 2-D string representations of each piece and then figuring out
-    #what each line of the final representation should be by looking at all the pieces
-    #that intersect that line.
+    def returnState(self):
+        state = {
+            'squares': copy.deepcopy(self.saved_squares),
+            'bag': copy.deepcopy(self.saved_bag)
+            #'discard': copy.deepcopy(self.saved_discard),
+        }
+        return state
+    
+    #A better visual representation of the board than old repr. Relies on accessing the
+    #2-D string representations of each piece and then figuring out what each line of the
+    #final representation should be by looking at all the pieces that intersect that line.
     def viewBoard(self):
         square_width = 15
         square_height = 6
@@ -426,10 +434,13 @@ class MyBoard:
     
     #Make random moves, alternating sides, until either duke is captured. Keeps track of
     #how many total moves are made.
-    def moveRandomly(self, saved = 0, filename = 'saved_game.txt', printed = 0, delay = 0.75):
+    def moveRandomly(self, saved = 0, printed = 0, delay = 0.75):
         turn = 0
         global iteration
         iteration = 0
+        if saved == 1:
+            state_list = []
+        success = 0
         while (len(self.listPiecesColor(turn)) > 0) and (iteration < 1000):
             error1 = error2 = 0
             if self.inGuard(turn):
@@ -440,11 +451,13 @@ class MyBoard:
                 #print self.color_dict[turn], " is in checkmate!. ", iteration
                 #print self
                 #raw_input("press enter to continue")
+                success = 1
                 break
             if error2:
                 #print self.color_dict[turn], " cannot make a move, and has lost.", iteration
                 #print self
                 #raw_input("press enter to continue")
+                success = 1
                 break
             turn = not turn
             iteration += 1
@@ -452,13 +465,17 @@ class MyBoard:
                 print iteration
                 print self
                 time.sleep(delay)
-            #if saved == 1:
-                #with open(filename, 'w') as infile:
-                    #save the game state somehow
+            if saved == 1:
+                state_list.append(self.returnState())
             if not self.updateDuke():
-                #print "Someone wins! Turn ", iteration
+                print "a duke has gone missing ", iteration
                 return iteration
-        #print "Something went wrong! Turn ", iteration
+        #the game has ended, if normally then success = 1
+        if saved == 1:
+            if success == 1:
+                return state_list
+            #print iteration, len(self.listPiecesColor(turn))
+            return False
         return iteration
 
 class Piece:
@@ -480,7 +497,8 @@ class Piece:
 #given a black and white bag of peices, pick the first three, which are determined by the
 #peice_moves.txt file, from each bag and place them on the board in starting positions at
 #random.
-def SetupBoard(white_bag, black_bag):
+def setupBoard():
+    white_bag, black_bag = setupBags()
     board = MyBoard()
     white_duke = [0, rnd.randint(0,1)+2]
     black_duke = [5, rnd.randint(0,1)+2]
@@ -579,8 +597,7 @@ def setupBags():
     return white_bag, black_bag
 
 def timeGames(num_games):
-    white_bag, black_bag = setupBags()
-    board = SetupBoard(white_bag, black_bag)
+    board = setupBoard()
     init_board = copy.deepcopy(board)
     iteration = 0
     num_turns = 0
@@ -595,6 +612,16 @@ def timeGames(num_games):
     valid = len(length_list)
     print valid, " out of ", num_games, " games took: ", b - a, '\nAverage number of turns per game: ', round(float(sum(length_list))/valid)
     return length_list
+
+def saveGame(filename = 'saved_game.txt', write_mode = 'w'):
+    board = setupBoard()
+    states = board.moveRandomly(saved = 1)
+    print len(states)
+    if states:
+        with open(filename, write_mode) as f:
+            pickle.dump(states, f)
+        print "Game saved."
+    
 
 def plotGames(length_list):
     max_turns = max(length_list)
