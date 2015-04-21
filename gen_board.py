@@ -37,6 +37,8 @@ class MyBoard:
             0: "White",
             1: "Black"
         }
+        self.save_names_dict = {}
+        self.load_names_dict = {}
     
     def __repr__(self):
         board = self.viewBoard()
@@ -81,11 +83,22 @@ class MyBoard:
         self.duke = copy.deepcopy(self.saved_duke_pos)
     
     def returnState(self):
-        state = {
-            'squares': copy.deepcopy(self.saved_squares),
-            'bag': copy.deepcopy(self.saved_bag)
-            #'discard': copy.deepcopy(self.saved_discard),
-        }
+        return_squares = [[[] for x in range(self.width)] for y in range(self.height)]
+        for i in range(self.width):
+            for j in range(self.height):
+                tile = self.squares[i][j]
+                if tile:
+                    return_squares[i][j] = [self.save_names_dict[tile.name], tile.color, tile.flipped]
+                else:
+                    return_squares[i][j] = []
+        white_bag = []
+        black_bag = []
+        for white_tile, black_tile,  in zip(self.bag[0], self.bag[1]):
+            white_bag.append(self.save_names_dict[white_tile.name])
+            black_bag.append(self.save_names_dict[black_tile.name])
+        
+        state = [return_squares, white_bag, black_bag]
+        
         return state
     
     #A better visual representation of the board than old repr. Relies on accessing the
@@ -498,7 +511,7 @@ class Piece:
 #peice_moves.txt file, from each bag and place them on the board in starting positions at
 #random.
 def setupBoard():
-    white_bag, black_bag = setupBags()
+    white_bag, black_bag, names = setupBags()
     board = MyBoard()
     white_duke = [0, rnd.randint(0,1)+2]
     black_duke = [5, rnd.randint(0,1)+2]
@@ -524,7 +537,16 @@ def setupBoard():
     rnd.shuffle(black_bag)
     board.bag[0] = white_bag
     board.bag[1] = black_bag
-
+    
+    save_names_dict = {}
+    load_names_dict = {}
+    for i in range(len(names)):
+        load_names_dict[i] = names[i]
+        save_names_dict[names[i]] = i
+    
+    board.load_names_dict = load_names_dict
+    board.save_names_dict = save_names_dict
+    
     return board
     
 def setupBags():
@@ -594,7 +616,7 @@ def setupBags():
         black.str_array[0].append(black_string)
         black.str_array[1].append(black_string)
     
-    return white_bag, black_bag
+    return white_bag, black_bag, names
 
 def timeGames(num_games):
     board = setupBoard()
