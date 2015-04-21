@@ -642,7 +642,7 @@ def saveGame(filename = 'saved_game.txt.gz', write_mode = 'wb'):
     print len(states)
     if states:
         with gzip.open(filename, write_mode) as f:
-            pickled_data = pickle.dumps(states)
+            pickled_data = pickle.dumps(states, -1)
             f.write(pickled_data)
         print "Game saved."
     
