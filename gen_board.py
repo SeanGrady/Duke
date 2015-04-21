@@ -7,6 +7,7 @@ import time
 import copy
 from matplotlib import pyplot as plt
 import cPickle as pickle
+import gzip
 
 #I should probably write a readme for this shit but I aint yet so holla if you have any
 #questions.
@@ -635,13 +636,14 @@ def timeGames(num_games):
     print valid, " out of ", num_games, " games took: ", b - a, '\nAverage number of turns per game: ', round(float(sum(length_list))/valid)
     return length_list
 
-def saveGame(filename = 'saved_game.txt', write_mode = 'w'):
+def saveGame(filename = 'saved_game.txt.gz', write_mode = 'wb'):
     board = setupBoard()
     states = board.moveRandomly(saved = 1)
     print len(states)
     if states:
-        with open(filename, write_mode) as f:
-            pickle.dump(states, f)
+        with gzip.open(filename, write_mode) as f:
+            pickled_data = pickle.dumps(states)
+            f.write(pickled_data)
         print "Game saved."
     
 
