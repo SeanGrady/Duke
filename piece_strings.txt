@@ -1,0 +1,204 @@
+Footman
+               
+       @       
+    @  I  @    
+       @       
+               
+FLIP
+       @       
+    @     @    
+       H       
+    @     @    
+               
+Duke
+               
+               
+    <  I  >    
+               
+               
+FLIP
+               
+       ^       
+       H       
+       v       
+               
+Seer
+       O       
+    @     @    
+ O     I     O 
+    @     @    
+       O       
+FLIP
+ O           O 
+       @       
+    @  H  @    
+       @       
+ O           O 
+Priest
+               
+    ^     ^    
+       I       
+    v     v    
+               
+FLIP
+ O           O 
+    @     @    
+       H       
+    @     @    
+ O           O 
+Marshall
+ O           O 
+               
+    <  I  >    
+               
+       O       
+FLIP
+               
+   [@][@][@]   
+ @  @  H  @  @ 
+    @     @    
+               
+Knight
+    O     O    
+               
+    @  I  @    
+       @       
+       @       
+FLIP
+               
+       ^       
+       H       
+    @     @    
+ @           @ 
+Pikeman
+ @           @ 
+    @     @    
+       I       
+               
+               
+FLIP
+    x     x    
+       @       
+       H       
+       @       
+       @       
+Champion
+       O       
+       @       
+ O  @  I  @  O 
+       @       
+       O       
+FLIP
+       O       
+       x       
+ O  x  H  x  O 
+       x       
+       O       
+General
+    O     O    
+       @       
+ @     I     @ 
+       @       
+               
+FLIP
+    O     O    
+       @       
+ @ [@] H [@] @ 
+   [ ][ ][ ]   
+               
+Bowman
+               
+       @       
+ O  @  I  @  O 
+               
+       O       
+FLIP
+       x       
+    x  @  x    
+       H       
+    @     @    
+               
+Ranger
+    O     O    
+ O     ^     O 
+       I       
+       v       
+               
+FLIP
+               
+    ^     ^    
+       H       
+               
+    O     O    
+Wizard
+               
+    @  @  @    
+    @  I  @    
+    @  @  @    
+               
+FLIP
+ O     O     O 
+               
+ O     H     O 
+               
+ O     O     O 
+Dragoon
+ x     x     x 
+               
+    @  I  @    
+               
+               
+FLIP
+    O  @  O    
+       @       
+       H       
+    v     v    
+               
+Duchess
+               
+               
+[ ][@] I [@][ ]
+               
+       @       
+FLIP
+               
+               
+[ ][@] H [@][ ]
+               
+       @       
+Longbowman
+               
+               
+       @       
+    @  I  @    
+       @       
+FLIP
+       x       
+       x       
+               
+       H       
+    @     @    
+Oracle
+               
+    @     @    
+       I       
+    @     @    
+               
+FLIP
+               
+               
+       H       
+               
+               
+Assassin
+       ^       
+               
+       I       
+               
+ v           v 
+FLIP
+ ^           ^ 
+               
+       H       
+               
+       v       
