@@ -40,7 +40,8 @@ class MyBoard:
         }
         self.save_names_dict = {}
         self.load_names_dict = {}
-    
+        self.turn = 0
+        
     def __repr__(self):
         board = self.viewBoard()
         return board
@@ -98,7 +99,7 @@ class MyBoard:
             white_bag.append(self.save_names_dict[white_tile.name])
             black_bag.append(self.save_names_dict[black_tile.name])
         
-        state = [return_squares, white_bag, black_bag]
+        state = [return_squares, white_bag, black_bag, self.turn]
         
         return state
     
@@ -449,31 +450,31 @@ class MyBoard:
     #Make random moves, alternating sides, until either duke is captured. Keeps track of
     #how many total moves are made.
     def moveRandomly(self, saved = 0, printed = 0, delay = 0.75):
-        turn = 0
+        self.turn = 0
         global iteration
         iteration = 0
         if saved == 1:
-            state_list = []
+            state_list = [self.returnState()]
         success = 0
-        while (len(self.listPiecesColor(turn)) > 0) and (iteration < 1000):
+        while (len(self.listPiecesColor(self.turn)) > 0) and (iteration < 1000):
             error1 = error2 = 0
-            if self.inGuard(turn):
-                error1 = self.leaveGuard(turn)
+            if self.inGuard(self.turn):
+                error1 = self.leaveGuard(self.turn)
             else:
-                error2 = self.randomMove(turn)
+                error2 = self.randomMove(self.turn)
             if error1:
-                #print self.color_dict[turn], " is in checkmate!. ", iteration
+                #print self.color_dict[self.turn], " is in checkmate!. ", iteration
                 #print self
                 #raw_input("press enter to continue")
                 success = 1
                 break
             if error2:
-                #print self.color_dict[turn], " cannot make a move, and has lost.", iteration
+                #print self.color_dict[self.turn], " cannot make a move, and has lost.", iteration
                 #print self
                 #raw_input("press enter to continue")
                 success = 1
                 break
-            turn = not turn
+            self.turn = not self.turn
             iteration += 1
             if printed:
                 print iteration
@@ -488,7 +489,7 @@ class MyBoard:
         if saved == 1:
             if success == 1:
                 return state_list
-            #print iteration, len(self.listPiecesColor(turn))
+            #print iteration, len(self.listPiecesColor(self.turn))
             return False
         return iteration
 
