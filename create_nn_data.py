@@ -63,24 +63,34 @@ for state in statelist:
                 nn_state[neuron] = (flipped * 2) - 1        #maps (0, 1) to (-1, 1)
     placeholder = board_width * board_height * (num_pieces * 2)
     #print placeholder
-    for piece in white_bag:
+    for piece in white_bag:                                 #This is so bad Ryan don't look. :(
         neuron = placeholder + piece
         if piece == 0 or piece == 5:
-            print "found a thing"
-            for i in range(3):
-                print neuron, nn_state[neuron]              #This is so bad Ryan don't look :(
+            offset = piece * 2/5
+            if nn_state[neuron] == 1:
+                neuron = placeholder + num_pieces + offset
+            #print "found a thing", piece, neuron
+            for i in range(2):     
+                #print neuron, nn_state[neuron]         
                 if nn_state[neuron] == 1:
+                    #print 'entered if', nn_state[neuron]
                     neuron += 1
                     continue
                 break
         nn_state[neuron] = 1
     placeholder = placeholder + num_pieces_tot
-    #print placeholder
+    #print "switching bag", placeholder
     for piece in black_bag:
         neuron = placeholder + piece
         if piece == 0 or piece == 5:
-            for i in range(3):              #Don't look at this either I'm a bad person. pls no jdge.
+            offset = piece * 2/5
+            if nn_state[neuron] == 1:
+                neuron = placeholder + num_pieces + offset
+            #print "found a thing", piece, neuron
+            for i in range(2):     
+                #print neuron, nn_state[neuron]         #Don't look at this either I'm a bad person. pls no jdge.
                 if nn_state[neuron] == 1:
+                    #print 'entered if', nn_state[neuron]
                     neuron += 1
                     continue
                 break
@@ -88,6 +98,6 @@ for state in statelist:
     placeholder = placeholder + num_pieces_tot
     #print placeholder
     nn_state[placeholder] = (turn * 2) - 1
-    nn_statelist.append(nn_state)
-    break
-                
+    nn_statelist.append(copy.deepcopy(nn_state))
+
+
