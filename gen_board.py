@@ -1,3 +1,7 @@
+import code
+import yaml
+import argparse
+import pdb
 import random as rnd
 from collections import deque
 import itertools as it
@@ -8,6 +12,11 @@ import copy
 from matplotlib import pyplot as plt
 import cPickle as pickle
 import gzip
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', action='store_true')
+args = parser.parse_args()
+
 
 #I should probably write a readme for this shit but I aint yet so holla if you have any
 #questions.
@@ -616,8 +625,56 @@ def setupBags():
         white.str_array[1].appendleft(white_string)
         black.str_array[0].append(black_string)
         black.str_array[1].append(black_string)
-    
+
+    printYaml(white_bag)
+
     return white_bag, black_bag, names
+
+def printYaml(bag):
+    #pdb.set_trace()
+    move_names = yaml.load(open('move_types.yml'))
+    print move_names
+    move_dict = {}
+    sides = {0:'front', 1:'back'}
+    for i in range(10):
+        print i 
+        move_dict[i] = move_names[i]
+    pieces = {
+        piece.name: {
+            sides[index]: {
+                buildMoveDict(side, move_names)
+            } for index, side in enumerate(piece.actions)
+        } for piece in bag
+    }
+    """
+    pieces = {}
+    sides = {0:'front', 1:'back'}
+    for piece in bag:
+        for index, side in enumerate(piece.actions):
+            for action in side:
+                pieces[piece.name][sides[index]][move_dict[action[0]]]['x'].append( action[1]*(action[3] if len(action) > 3 else 1))
+                pieces[piece.name][sides[index]][move_dict[action[0]]]['y'] = action[2]*(action[3] if len(action) > 3 else 1)
+    """
+    print pieces
+    stream = file('yamlpieces.yaml', 'w')
+    yaml.dump(pieces, stream)
+
+def buildMoveDict(action_list, move_names):
+    move_dict = {} 
+    
+    for action in action_list:
+        move_dict[move_names[action[0]]] = []
+    
+    for action in action_list:
+        move_dict[move_names[action[0]]].append(
+            { 
+                'x': action[1] if len(action) > 1 else 111,
+                'y': action[2] if len(action) > 2 else 222,
+            }
+        )
+
+    print move_dict
+    return move_dict
 
 def timeGames(num_games):
     board = setupBoard()
@@ -656,4 +713,7 @@ def plotGames(length_list):
     plt.plot(range(max_turns + 1), histogram)
     plt.show()
 
-
+if vars(args)['d']:
+   # pdb.set_trace()
+    #code.interact(local=locals())
+    setupBags()
