@@ -1,3 +1,7 @@
+import code
+import yaml
+import argparse
+import pdb
 import random as rnd
 from collections import deque
 import itertools as it
@@ -8,6 +12,11 @@ import copy
 from matplotlib import pyplot as plt
 import cPickle as pickle
 import gzip
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', action='store_true')
+args = parser.parse_args()
+
 
 #I should probably write a readme for this shit but I aint yet so holla if you have any
 #questions.
@@ -616,7 +625,7 @@ def setupBags():
         white.str_array[1].appendleft(white_string)
         black.str_array[0].append(black_string)
         black.str_array[1].append(black_string)
-    
+
     return white_bag, black_bag, names
 
 def timeGames(num_games):
@@ -656,4 +665,5 @@ def plotGames(length_list):
     plt.plot(range(max_turns + 1), histogram)
     plt.show()
 
-
+if vars(args)['d']:
+    code.interact(local=locals())

@@ -1,0 +1,290 @@
+Assassin:
+  back:
+    jump_slide:
+    - {x: 1, y: 1}
+    - {x: -1, y: 0}
+    - {x: 1, y: -1}
+  front:
+    jump_slide:
+    - {x: 1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+Bowman:
+  back:
+    move:
+    - {x: 1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+    strike:
+    - {x: 2, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: -1}
+  front:
+    jump:
+    - {x: 0, y: 2}
+    - {x: -2, y: 0}
+    - {x: 0, y: -2}
+    move:
+    - {x: 1, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: -1}
+Champion:
+  back:
+    jump:
+    - {x: 2, y: 0}
+    - {x: 0, y: 2}
+    - {x: -2, y: 0}
+    - {x: 0, y: -2}
+    strike:
+    - {x: 1, y: 0}
+    - {x: 0, y: 1}
+    - {x: -1, y: 0}
+    - {x: 0, y: -1}
+  front:
+    jump:
+    - {x: 2, y: 0}
+    - {x: 0, y: 2}
+    - {x: -2, y: 0}
+    - {x: 0, y: -2}
+    move:
+    - {x: 1, y: 0}
+    - {x: 0, y: 1}
+    - {x: -1, y: 0}
+    - {x: 0, y: -1}
+Dragoon:
+  back:
+    jump:
+    - {x: 2, y: 1}
+    - {x: 2, y: -1}
+    move:
+    - {x: 1, y: 0}
+    - {x: 1, y: 0}
+    slide:
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+  front:
+    move:
+    - {x: 0, y: 1}
+    - {x: 0, y: -1}
+    strike:
+    - {x: 2, y: 0}
+    - {x: 2, y: 2}
+    - {x: 2, y: -2}
+Duchess:
+  back:
+    command_square:
+    - {x: 0, y: 1}
+    move:
+    - {x: 0, y: 1}
+    - {x: 0, y: -1}
+    - {x: -1, y: 0}
+    special: summon
+  front:
+    command_square:
+    - {x: 0, y: 1}
+    move:
+    - {x: 0, y: 1}
+    - {x: 0, y: -1}
+    - {x: -1, y: 0}
+    special: summon
+Duke:
+  back:
+    slide:
+    - {x: 1, y: 0}
+    - {x: -1, y: 0}
+  front:
+    slide:
+    - {x: 0, y: 1}
+    - {x: 0, y: -1}
+Footman:
+  back:
+    move:
+    - {x: 1, y: 1}
+    - {x: 1, y: -1}
+    - {x: -1, y: -1}
+    - {x: -1, y: 1}
+    - {x: 1, y: 0}
+  front:
+    move:
+    - {x: 1, y: 0}
+    - {x: 0, y: -1}
+    - {x: 0, y: 1}
+    - {x: -1, y: 0}
+General:
+  back:
+    command_square:
+    - {x: 0, y: 1}
+    jump:
+    - {x: 2, y: 1}
+    - {x: 2, y: -1}
+    move:
+    - {x: 1, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 1}
+    - {x: 0, y: -1}
+    - {x: 0, y: -1}
+  front:
+    jump:
+    - {x: 2, y: 1}
+    - {x: 2, y: -1}
+    move:
+    - {x: 1, y: 0}
+    - {x: 0, y: 1}
+    - {x: -1, y: 0}
+    - {x: 0, y: -1}
+Knight:
+  back:
+    move:
+    - {x: -1, y: 1}
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+    - {x: -1, y: -1}
+    slide:
+    - {x: 1, y: 0}
+  front:
+    jump:
+    - {x: 2, y: -1}
+    - {x: 2, y: 1}
+    move:
+    - {x: 0, y: 1}
+    - {x: -1, y: 0}
+    - {x: -1, y: 0}
+    - {x: 0, y: -1}
+Longbowman:
+  back:
+    move:
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+    strike:
+    - {x: 2, y: 0}
+    - {x: 3, y: 0}
+  front:
+    move:
+    - {x: 1, y: 0}
+    - {x: 0, y: -1}
+    - {x: 0, y: 1}
+    - {x: -1, y: 0}
+Marshall:
+  back:
+    command_square:
+    - {x: 1, y: 0}
+    move:
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 0, y: 1}
+    - {x: 0, y: 1}
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+    - {x: 0, y: -1}
+    - {x: 0, y: -1}
+    - {x: 1, y: -1}
+  front:
+    jump:
+    - {x: 2, y: 2}
+    - {x: -2, y: 0}
+    - {x: 2, y: -2}
+    slide:
+    - {x: 0, y: 1}
+    - {x: 0, y: -1}
+Oracle:
+  back: {special: divination}
+  front:
+    move:
+    - {x: 1, y: 1}
+    - {x: 1, y: -1}
+    - {x: -1, y: -1}
+    - {x: -1, y: 1}
+Pikeman:
+  back:
+    move:
+    - {x: 1, y: 0}
+    - {x: -1, y: 0}
+    - {x: -1, y: 0}
+    strike:
+    - {x: 2, y: 1}
+    - {x: 2, y: -1}
+  front:
+    move:
+    - {x: 1, y: 1}
+    - {x: 1, y: 1}
+    - {x: 1, y: -1}
+    - {x: 1, y: -1}
+Priest:
+  back:
+    jump:
+    - {x: 2, y: 2}
+    - {x: -2, y: 2}
+    - {x: -2, y: -2}
+    - {x: 2, y: -2}
+    move:
+    - {x: 1, y: 1}
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+    - {x: 1, y: -1}
+  front:
+    slide:
+    - {x: 1, y: 1}
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+    - {x: 1, y: -1}
+Ranger:
+  back:
+    jump:
+    - {x: -2, y: 1}
+    - {x: -2, y: -1}
+    slide:
+    - {x: 1, y: 1}
+    - {x: 1, y: -1}
+  front:
+    jump:
+    - {x: 2, y: 1}
+    - {x: 1, y: 2}
+    - {x: 2, y: -1}
+    - {x: 1, y: -2}
+    slide:
+    - {x: 1, y: 0}
+    - {x: -1, y: 0}
+Seer:
+  back:
+    jump:
+    - {x: 2, y: 2}
+    - {x: -2, y: 2}
+    - {x: -2, y: -2}
+    - {x: 2, y: -2}
+    move:
+    - {x: 1, y: 0}
+    - {x: 0, y: 1}
+    - {x: -1, y: 0}
+    - {x: 0, y: -1}
+  front:
+    jump:
+    - {x: 2, y: 0}
+    - {x: 0, y: 2}
+    - {x: -2, y: 0}
+    - {x: 0, y: -2}
+    move:
+    - {x: 1, y: 1}
+    - {x: -1, y: 1}
+    - {x: -1, y: -1}
+    - {x: 1, y: -1}
+Wizard:
+  back:
+    jump:
+    - {x: 2, y: 0}
+    - {x: 2, y: 2}
+    - {x: 0, y: 2}
+    - {x: -2, y: 2}
+    - {x: -2, y: 0}
+    - {x: -2, y: -2}
+    - {x: 0, y: -2}
+    - {x: 2, y: -2}
+  front:
+    move:
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 0, y: 1}
+    - {x: -1, y: 1}
+    - {x: -1, y: 0}
+    - {x: -1, y: -1}
+    - {x: 0, y: -1}
+    - {x: 1, y: -1}
