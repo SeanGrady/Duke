@@ -641,9 +641,7 @@ def printYaml(bag):
         move_dict[i] = move_names[i]
     pieces = {
         piece.name: {
-            sides[index]: {
-                buildMoveDict(side, move_names)
-            } for index, side in enumerate(piece.actions)
+            sides[index]: buildMoveDict(side, move_names) for index, side in enumerate(piece.actions)
         } for piece in bag
     }
     """
