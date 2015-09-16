@@ -1,41 +1,36 @@
-from collections import defaultdict
+import yaml
 
 class Piece:
 
-    def __init__(self, name, color, sides):
+    pieces = yaml.load(open('yamlpieces.yaml', 'r'))
+
+    def __init__(self, name, color, current_side=None, x=None, y=None):
         self.name = name
         self.color = color
-        self.sides = sides
-        self.current_side = 'front'
+        self.current_side = current_side
+        self.x = x
+        self.y = y
+        self.sides = self.pieces[self.name.capitalize()]
 
     def __repr__(self):
-        return "{color} {name} ({current_side})".format(color=self.color, name=self.name, current_side=self.current_side)
+        return "{color} {name} ({current_side})".format(
+                color=self.color,
+                name=self.name,
+                current_side=self.current_side
+        )
 
-    """
-    def available_moves(self, x, y):
-        destinations = defaultdict(list)
-        for move_type, move_list in self.sides[self.current_side].iteritems():
-            for move in move_list: 
-                xdest = move['x'] + x
-                ydest = move['y'] + y
-                if xdest in range(6) and ydest in range(6):
-                    destinations[move_type].append({'x': xdest, 'y': ydest})
-        return dict(destinations)
-    """
+    def is_on_board(self, move):
+        return move['x'] in range(6) and move['y'] in range(6)
 
-    def f2(self, move_list):
-        destinations = []
-        for move in move_list: 
-            xdest = move['x'] + self.x
-            ydest = move['y'] + self.y
-            if xdest in range(6) and ydest in range(6):
-                destinations.append({'x': xdest, 'y': ydest})
-        
+    def add_position(self, move):
+        return dict(x=move['x'] + self.x, y=move['y'] + self.y)
 
-    def f1(self, tuple):
-        move_type, move_list = tuple
-        destinations = map(f2, move_list)
-        return (move_type, destinations)
+    def destinations(self, relative_moves):
+        return filter(self.is_on_board, map(self.add_position, relative_moves))
 
     def available_moves(self):
-        return dict(map(self.f1, self.sides[self.current_side].iteritems()))
+        return {
+                move_type: self.destinations(relative_moves)
+                for move_type, relative_moves
+                in self.sides[self.current_side].iteritems()
+        }
