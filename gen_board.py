@@ -51,8 +51,8 @@ class MyBoard:
         self.load_names_dict = {}
     
     def __repr__(self):
-        board = self.viewBoard()
-        return board
+        board_str = self.viewBoard()
+        return board_str
     #old implementation of __repr__
     '''
         square_width = 16
