@@ -1,8 +1,10 @@
 import yaml
+import os
+from settings import APP_ROOT
 
 class Piece:
 
-    pieces = yaml.load(open('yamlpieces.yaml', 'r'))
+    pieces = yaml.load(open(os.path.join(APP_ROOT, 'yamlpieces.yaml'), 'r'))
 
     def __init__(self, name, color, current_side=None, x=None, y=None):
         self.name = name
