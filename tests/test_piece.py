@@ -1,4 +1,5 @@
 from piece import Piece
+from point import Point
 import unittest
 
 class TestPiece(unittest.TestCase):
@@ -8,8 +9,8 @@ class TestPiece(unittest.TestCase):
         bowman = Piece('Bowman', 'white', current_side='back', x=x, y=y)
 
         expected_moves = {
-                'strike': [{'x': 5, 'y': 5}, {'x': 5, 'y': 3}],
-                'move': [{'x': 5, 'y': 4}, {'x': 3, 'y': 5}, {'x': 3, 'y': 3}],
+                'strike': set([Point(5, 5), Point(5, 3)]),
+                'move': set([Point(5, 4), Point(3, 5), Point(3, 3)]),
         }
         self.assertEqual(bowman.available_moves(), expected_moves)
 
@@ -18,10 +19,10 @@ class TestPiece(unittest.TestCase):
         footman = Piece('Footman', 'white', current_side='front', x=x, y=y)
 
         expected_moves = {
-                'move': [
-                    {'x': 2, 'y': 3}, {'x': 4, 'y': 3},
-                    {'x': 3, 'y': 2}, {'x': 3, 'y': 4},
-                ],
+                'move': set([
+                    Point(2, 3), Point(4, 3),
+                    Point(3, 2), Point(3, 4),
+                ]),
         }
         self.assertEqual(footman.available_moves(), expected_moves)
 
