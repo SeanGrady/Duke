@@ -4,6 +4,9 @@ class Point:
         self.y = y
 
     def __repr__(self):
+        return "P({}, {})".format(self.x, self.y)
+
+    def __str__(self):
         return "({}, {})".format(self.x, self.y)
 
     def __hash__(self):
