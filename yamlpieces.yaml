@@ -78,7 +78,8 @@ Duchess:
     - {x: 0, y: 1}
     - {x: 0, y: -1}
     - {x: -1, y: 0}
-    special: summon
+    summon:
+    - {x: 0, y: 0}
   front:
     command_square:
     - {x: 0, y: 1}
@@ -86,7 +87,8 @@ Duchess:
     - {x: 0, y: 1}
     - {x: 0, y: -1}
     - {x: -1, y: 0}
-    special: summon
+    summon:
+    - {x: 0, y: 0}
 Duke:
   back:
     slide:
@@ -187,7 +189,9 @@ Marshall:
     - {x: 0, y: 1}
     - {x: 0, y: -1}
 Oracle:
-  back: {special: divination}
+  back:
+    divination:
+    - {x: 0, y: 0}
   front:
     move:
     - {x: 1, y: 1}
