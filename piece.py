@@ -34,12 +34,22 @@ class Piece:
 
     pieces = PieceHelper.load_pieces()
 
-    def __init__(self, name, color, current_side=None, x=None, y=None):
+    def __init__(self, name, color, current_side=None, coord=None , x=None, y=None):
         self.name = name
         self.color = color
         self.current_side = current_side
-        self.x = x
-        self.y = y
+        if isinstance(coord, dict):
+            self.x = coord['x']
+            self.y = coord['y']
+        if isinstance(coord, tuple):
+            self.x, self.y = coord
+        if isinstance(coord, Point):
+            self.x = point.x
+            self.y = point.y
+        print coord  #what the fuck is happening here?
+        if coord:
+            self.x = x
+            self.y = y
         self.sides = self.pieces[self.name.capitalize()]
 
     def __repr__(self):
